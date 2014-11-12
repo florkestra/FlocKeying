@@ -11,24 +11,30 @@ var synth = flock.synth.polyphonic({
         mul: {
             id: "env",
             ugen: "flock.ugen.env.simpleASR",
-            attack: 0.25,
+            attack: 0.1,
             sustain: 1.0,
-            release: 0.5
+            release: 2.0
         }
    }
 });
 
-
+// http://stackoverflow.com/questions/7686197/how-can-i-avoid-autorepeated-keydown-events-in-javascript
+var keyAllowed = {}; // store keys down to avoid autorepeat
 
 $(document).on('keydown', function(e){
-  //console.log(e);
-  $('#greeting').html(e.which.toString());
+  if (keyAllowed [e.which] === false) return;
+  keyAllowed [e.which] = false;
+  $('#greeting').html( fluid.prettyPrintJSON(keyAllowed) );
+
   synth["noteOn"]("key"+e.which.toString(), {"synthy.freq":e.which*4});
 });
 
 
 $(document).on('keyup', function(e){
-  synth["noteOff"]("key"+e.which.toString() );
+  keyAllowed [e.which] = true;
+    $('#greeting').html( fluid.prettyPrintJSON(keyAllowed) );
+
+  synth["noteOff"]("key"+e.which.toString(), {"synthy.freq":e.which*4} );
 });
 
 synth.play();
